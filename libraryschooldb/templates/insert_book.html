@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Εισαγωγή Βιβλίου στο Σύστημα</title>
+    <style>
+        .author-input {
+            margin-bottom: 10px;
+        }
+
+        .keyword-input {
+            margin-bottom: 10px;
+        }
+
+        .blue-button {
+            background-color: blue;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .blue-button:hover {
+            background-color: green;
+        }
+
+        h1 {
+            color: red;
+        }
+
+        .headline {
+            text-decoration: none;
+            color: red;
+            font-size: 30px;
+        }
+
+        .headline:hover {
+            font-size: 32px;
+        }
+
+        .genreContainer {
+            margin-bottom: 10px;
+        }
+
+        #otherGenreInput {
+            display: none;
+        }
+
+        .removeGenre {
+            cursor: pointer;
+            background-color: #ECEFF1;
+            color: black;
+            border: 1px solid black;
+            padding: 3px 8px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-left: 10px;
+            border-radius: 4px;
+        }
+    </style>
+    <script>
+        function addAuthorField() {
+            var container = document.getElementById("authorContainer");
+            var input = document.createElement("input");
+            input.type = "text";
+            input.name = "authors";
+            input.placeholder = "Συγγραφέας/είς";
+            container.appendChild(input);
+            container.appendChild(document.createElement("br"));
+        }
+
+        function removeAuthorField() {
+            var container = document.getElementById("authorContainer");
+            var inputs = container.getElementsByTagName("input");
+            if (inputs.length > 0) {
+                container.removeChild(inputs[inputs.length - 1]);
+                container.removeChild(container.lastElementChild);
+            }
+        }
+
+        function addKeywordField() {
+            var container = document.getElementById("keywordContainer");
+            var input = document.createElement("input");
+            input.type = "text";
+            input.name = "keywords";
+            input.placeholder = "Λέξη Κλειδί";
+            container.appendChild(input);
+            container.appendChild(document.createElement("br"));
+        }
+
+        function removeKeywordField() {
+            var container = document.getElementById("keywordContainer");
+            var inputs = container.getElementsByTagName("input");
+            if (inputs.length > 0) {
+                container.removeChild(inputs[inputs.length - 1]);
+                container.removeChild(container.lastElementChild);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1><a class="headline" href="{{ url_for('home.home_page') }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+    <h2>Εισαγωγή Βιβλίου</h2>
+    <!-- Flash messages block -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div>
+                {% for message in messages %}
+                    <div style="border: 1px solid; margin-bottom: 10px; padding: 10px; color: red;">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <form action="/login/{{ role }}/{{ user_id }}/{{ username }}/insert_book" method="post">
+        {{ form.csrf_token }}
+        <fieldset>
+            {{ form.title.label }}: {{ form.title }} <br>
+            {% for error in form.title.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+            {{ form.publisher.label }}: {{ form.publisher }} <br>
+            {% for error in form.publisher.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+            {{ form.isbn.label }}: {{ form.isbn }} <br>
+            {% for error in form.isbn.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+
+            <!-- Authors -->
+            {{ form.authors.label }}: <br>
+            <div id="authorContainer">
+                {% for author in form.authors %}
+                    {{ author }} <br>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="addAuthorField()">+</button>
+            <button type="button" onclick="removeAuthorField()">-</button>
+            <br>
+
+            <!-- Genre Leverage -->
+            <label>
+                <input type="checkbox" id="genreLeverage" name="genre_leverage">
+                Εισαγωγή Νέου Είδους
+            </label>
+            <br>
+
+            <!-- Genres Dropdown -->
+            <div id="genresContainer">
+                {{ form.genres.label }}: {{ form.genres }} <br>
+                {% for error in form.genres.errors %}
+                    <div class="error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- New Genre Input -->
+            <div id="newGenreContainer">
+                {{ form.new_genre.label }}: {{ form.new_genre }} <br>
+                {% for error in form.new_genre.errors %}
+                    <div class="error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            {{ form.number_of_pages.label }}: {{ form.number_of_pages }} <br>
+            {% for error in form.number_of_pages.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+            {{ form.description.label }}: {{ form.description }} <br>
+            {% for error in form.description.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+            {{ form.image_url.label }}: {{ form.image_url }} <br>
+            {{ form.language.label }}: {{ form.language }} <br>
+            {% for error in form.language.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+
+            <!-- Keywords -->
+            {{ form.keywords.label }}: <br>
+            <div id="keywordContainer">
+                {% for keyword in form.keywords %}
+                    {{ keyword }} <br>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="addKeywordField()">+</button>
+            <button type="button" onclick="removeKeywordField()">-</button>
+            <br>
+
+            {{ form.number_of_copies.label }}: {{ form.number_of_copies }} <br>
+            {% for error in form.number_of_copies.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+
+            {{ form.submit }}
+        </fieldset>
+    </form>
+
+    <script>
+        const genreLeverage = document.getElementById('genreLeverage');
+        const genresContainer = document.getElementById('genresContainer');
+        const newGenreContainer = document.getElementById('newGenreContainer');
+        const newGenreInput = document.getElementById('{{ form.new_genre.id }}');
+
+        genreLeverage.addEventListener('change', () => {
+            if (genreLeverage.checked) {
+                genresContainer.style.display = 'none';
+                newGenreContainer.style.display = 'block';
+                newGenreInput.setAttribute('required', '');
+            } else {
+                genresContainer.style.display = 'block';
+                newGenreContainer.style.display = 'none';
+                newGenreInput.removeAttribute('required');
+            }
+        });
+    </script>
+</body>
+</html>

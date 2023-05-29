@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Λίστα Βιβλίων</title>
+
+    <style>
+        /* Styles are the same as the previous version */
+    </style>
+    <script>
+        /* JavaScript functions are the same as the previous version */
+    </script>
+</head>
+<body>
+    <h1><a class="headline" href="{{ url_for('operator.operator_home', role=role, user_id=user_id, username=username) }}">Λίστα Βιβλίων Σχολικής Μονάδας</a></h1>
+
+    <!-- Search form -->
+    <div class="search-form">
+        <form method="POST" action="{{ url_for('operator.book_list', role=role, user_id=user_id, username=username) }}">
+            {{ form.csrf_token }}
+            <input type="text" id="booksearch" name="search" placeholder="Αναζήτηση βιβλίων...">
+            <br><br>
+            <input type="submit" value="Αναζήτηση">
+        </form>
+    </div>
+
+    <!-- Books list -->
+    <div class="books">
+        <ul class="list-group">
+            {% for book in books_list %}
+                <li class="list-group-item">
+                    <img src="{{ book.Image }}" alt="Book image"><br>
+                    <strong>Τίτλος:</strong> {{ book.Title }} <br>
+                    <strong>ISBN:</strong> {{ book.ISBN }} <br>
+                    <strong>Εκδότης:</strong> {{ book.Publisher }} <br>
+                    <strong>Κατηγορίες:</strong> {{ book.Categories }} <br>
+                    <strong>Λέξεις-κλειδιά:</strong> {{ book.Keywords }} <br>
+                    <strong>Διαθέσιμα Αντίτυπα:</strong> {{ book.TotalCopies }} <br>
+                    <div class="book-action">
+                        <a href="{{ url_for('operator.edit_book', role=role, user_id=user_id, username=username, book_id=book.BookID) }}">Επεξεργασία</a>
+                        <form action="{{ url_for('operator.remove_book', role=role, user_id=user_id, username=username, book_id=book.BookID) }}" method="post" style="display: inline;">
+                            <button type="submit" onclick="return confirm('Are you sure you want to delete this book?')">Αφαίρεση</button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

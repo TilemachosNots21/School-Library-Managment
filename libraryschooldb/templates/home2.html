@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width", initial-scale="1.0">
+        <title>Δίκτυο Σχολικών Βιβλιοθηκών</title>
+        <style>
+            h1 {
+                color: red;
+            }
+
+            .headline {
+                text-decoration: none;
+                color: red;
+                font-size: 30px;
+            }
+
+            .headline:hover {
+                font-size: 32px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a class="headline", href="{{ url_for('home.home_page') }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+        <a href="{{ url_for('auth.login') }}">Login</a> &ensp;
+        <a href="{{ url_for('auth.register') }}">Register</a> &ensp;
+        <a href="{{ url_for('library.list') }}">Λίστα Βιβλιοθηκών</a> &ensp;
+        <a>Οδηγός Χρήστη</a> <br>
+        <br>
+        <fieldset>
+            <h2>Επιλογές Κεντρικού Χειριστή (Admin)</h2>
+        <ul>
+            <a href="{{ url_for('admin.register_library') }}">Καταχώρηση Βιβλιοθηκών</a> <br>
+            <a>Έγκριση Αιτήσεων Εγγραφής Υπεύθυνων Χειριστών</a> <br>
+            <a>Δημιουργία Αντίγραφου Ασφάλειας (Backup)</a> <br>
+            <a>Επαναφορά Συστήματος (Restore)</a> <br>
+        </ul>
+        </fieldset>
+        <fieldset>
+            <h2>Επιλογές Υπεύθυνου Χειριστή (Operator)</h2>
+        <ul>
+            <h3>Ενέργειες</h3>
+            <ul>
+                <a href="{{ url_for('operator.insert_book') }}">Εισαγωγή Νέου Βιβλίου στη Βιβλιοθήκη</a> <br>
+                <a href="{{ url_for('operator.borrow_book') }}">Δανεισμός Βιβλίου</a> <br>
+                <a href="{{ url_for('operator.registration_requests') }}">Αιτήματα Εγγραφής Χρηστών</a> <br>
+
+                <a>Συνολικός Αριθμός Δανεισμών ανά Σχολική Μονάδα</a> <br>
+            </ul>
+            <h3>Εποπτεία</h3>
+            <ul>
+                <a href="{{ url_for('operator.book_list') }}">Λίστα Βιβλίων Σχολικής Μονάδας</a> <br>
+                <a href="{{ url_for('operator.users_list') }}">Εμφάνιση Χρηστών</a> <br>
+                <a href="{{ url_for('operator.current_reservations') }}">Εμφάνιση Τρεχόντων Κρατήσεων και Δανεισμών</a> <br>
+                <a href="{{ url_for('operator.overdue') }}">Εμφάνιση Καθυστερημένων Επιστροφών</a> <br>
+                <a href="{{ url_for('operator.registration_requests') }}">Αιτήματα Εγγραφής Χρηστών</a>
+            </ul>
+        </ul>
+        </fieldset>
+    </body>
+</html>

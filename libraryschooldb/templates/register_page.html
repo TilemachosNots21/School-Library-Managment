@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width", initial-scale="1.0">
+        <title>Register</title>
+
+        <style>
+            .blue-button {
+                background-color: blue;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+
+            .blue-button:hover {
+                background-color: green;
+            }
+
+            .headline {
+                text-decoration: none;
+                color: red;
+                font-size: 30px;
+            }
+
+            .headline:hover {
+                font-size: 32px;
+            }
+
+            .form-group {
+                margin-bottom: 10px;
+            }
+        </style>
+
+        <script>
+            function togglePhoneNumber() {
+                var role = document.querySelector('input[name="role"]:checked').value;
+                var phoneNumberField = document.getElementById('phone_number_field');
+                if (role === 'operator') {
+                    phoneNumberField.style.display = 'block';
+                } else {
+                    phoneNumberField.style.display = 'none';
+                }
+            }
+            window.onload = togglePhoneNumber;
+
+        </script>
+    </head>
+    <body>
+        <h1><a class="headline" href="{{url_for('home.home_page')}}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            {{ form.csrf_token }}
+            <h2>Εγγραφή Χρήστη - Registration</h2>
+            <fieldset>
+                <h4>Στοιχεία Χρήστη:</h4>
+                <div class="form-group">
+                    <label>Όνομα Χρήστη (username):</label>
+                    {{ form.username(size=20) }}
+                </div>
+                <div class="form-group">
+                    <label>Όνομα:</label>
+                    {{ form.name(size=20) }}
+                </div>
+                <div class="form-group">
+                    <label>Επίθετο:</label>
+                    {{ form.surname(size=20) }}
+                </div>
+                <div class="form-group">
+                    <label>Ημερομηνία Γέννησης:</label>
+                    {{ form.birthdate }}
+                </div>
+                <div class="form-group">
+                    <label>E-mail:</label>
+                    {{ form.email(size=20) }}
+                </div>
+                <div id="phone_number_field" class="form-group">
+                    <label>Τηλέφωνο:</label>
+                    {{ form.phoneNumber(size=20) }}
+                    {% if form.phoneNumber.errors %}
+                        <ul class="errors">
+                            {% for error in form.phoneNumber.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Κωδικός:</label>
+                    {{ form.password(size=20) }}
+                </div>
+                <div class="form-group">
+                    <label>Σχολική Μονάδα:</label>
+                    <select name="school_unit">
+                        {% for unit in schoolUnits %}
+                        <option value="{{ unit }}">{{ unit }}</option>
+                        {% endfor %}
+                     </select>
+                </div>
+                <h4>Κατηγορία Χρήστη:</h4>
+                {{ form.role(onchange="togglePhoneNumber()") }}
+            </fieldset>
+            <a href="{{ url_for('auth.login') }}" style="text-decoration: none">Έχετε ήδη λογαριασμό; Συνδεθείτε εδώ!</a> <br>
+            {{ form.submit(class_="blue-button") }}
+        </form>
+    </body>
+</html>

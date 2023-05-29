@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!--Allowing the page to appear evenly in the respective device (preventing desktop view on mobile).-->
+        <meta name="viewport" content="width=device-width", initial-scale="1.0">
+        <!--Title Displayed in the Browser Tab.-->
+        <title>Δίκτυο Σχολικών Βιβλιοθηκών</title>
+        <style>
+            h1 {
+                color: red;
+            }
+
+            .headline {
+                text-decoration: none;
+                color: red;
+                font-size: 30px;
+            }
+
+            .headline:hover {
+                font-size: 32px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a class="headline" href="{{ url_for('oper.operator_dashboard', role=role, user_id=user_id, username=username) }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+        <a>Οδηγός Χρήστη</a> &ensp;
+        <a href="{{url_for('auth.logout')}}">Log Out</a> <br>
+        <br>
+        <fieldset>
+            <h2>Επιλογές Υπεύθυνου Χειριστή (Operator)</h2>
+        <ul>
+            <h3>Ενέργειες</h3>
+            <ul>
+                <a href="{{ url_for('oper.insert_book', role=role, user_id=user_id, username=username) }}">Εισαγωγή Νέου Βιβλίου στη Βιβλιοθήκη</a> <br>
+            </ul>
+            <h3>Εποπτεία</h3>
+            <ul>
+                <a href="{{ url_for('oper.book_list', role=role, user_id=user_id, username=username) }}">Λίστα Βιβλίων Σχολικής Μονάδας</a> <br>
+                <a href="Users_List.html">Εμφάνιση Χρηστών</a> <br>
+                <!--Εποπτέια: συνολικά είτε κατόπιν αναζήτησης ανά χρήστη.-->
+                <a href="Reservations.html">Εμφάνιση Τρεχόντων Κρατήσεων και Δανεισμών</a> <br>
+                <!--Εμφανίζονται ξεχωριστά οι καθυστερήσεις.-->
+                <a href="Overdue.html">Εμφάνιση Καθηστερημένων Επιστροφών</a> <br>
+                <!--Εμφανίζονται οι αιτήσεις εγγραφών στο σύστημα.-->
+                <a href="Registration_requests.html">Αιτήματα Εγγραφής Χρηστών</a>
+            </ul>
+        </ul>
+        </fieldset>
+    </body>
+</html>

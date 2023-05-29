@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width", initial-scale="1.0">
+        <title>Login</title>
+        <style>
+            h1 {
+                color: red;
+            }
+            h4 {
+                color: blue;
+            }
+
+            .blue-button {
+                background-color: blue;
+                border: none;
+                color: white;
+                padding: 7px 15px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+
+            .blue-button:hover {
+                background-color: green;
+            }
+
+            .headline {
+                text-decoration: none;
+                color: red;
+                font-size: 30px;
+            }
+
+            .headline:hover {
+                font-size: 32px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a class="headline" href="{{ url_for('home.home_page') }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+        <h2>Είσοδος</h2>
+        <form action="{{ url_for('auth.login') }}" method="POST">
+            {{ form.csrf_token }}
+            <label>Όνομα Χρήστη (username):</label> {{ form.username(size=20) }}
+            {% if form.username.errors %}
+                <ul class="errors">
+                {% for error in form.username.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            <br><br>
+            <label> Κωδικός (password) :</label> {{ form.password(size=20) }}
+            {% if form.password.errors %}
+                <ul class="errors">
+                {% for error in form.password.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            <br>
+            {{ form.submit(class_="blue-button") }}
+            <br>
+        </form>
+        <a href="{{ url_for('auth.request_password_reset') }}">Ξέχασες τον κωδικό;</a>
+        <a href="{{ url_for('auth.register') }}">Νέος χρήστης; Κάνε εγγραφή</a>
+    </body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Edit Book</title>
+    <style>
+        form {
+            width: 500px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, textarea, select {
+            width: 100%;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 10px;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit Book</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <label>Τίτλος</label>
+        {{ form.title() }}
+        <span class="error">{{ form.title.errors[0] if form.title.errors }}</span>
+
+        <label>ISBN</label>
+        {{ form.isbn() }}
+        <span class="error">{{ form.isbn.errors[0] if form.isbn.errors }}</span>
+
+        <label>Εκδότης</label>
+        {{ form.publisher() }}
+        <span class="error">{{ form.publisher.errors[0] if form.publisher.errors }}</span>
+
+        <label>Συγγραφείς</label>
+        {{ form.authors() }}
+        <span class="error">{{ form.authors.errors[0] if form.authors.errors }}</span>
+
+        <label>Είδος/Κατηγορία</label>
+        {{ form.categories() }}
+        <span class="error">{{ form.categories.errors[0] if form.categories.errors }}</span>
+
+        <label>Λέξεις κλειδιά</label>
+        {{ form.keywords() }}
+        <span class="error">{{ form.keywords.errors[0] if form.keywords.errors }}</span>
+
+        <label>Αντίγραφα</label>
+        {{ form.totalCopies() }}
+        <span class="error">{{ form.totalCopies.errors[0] if form.totalCopies.errors }}</span>
+
+        <button type="submit">Update Book</button>
+    </form>
+</body>
+</html>

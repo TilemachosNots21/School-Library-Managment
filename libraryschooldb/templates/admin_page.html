@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width", initial-scale="1.0">
+        <title>Δίκτυο Σχολικών Βιβλιοθηκών</title>
+        <style>
+            h1 {
+                color: red;
+            }
+
+            .headline {
+                text-decoration: none;
+                color: red;
+                font-size: 30px;
+            }
+
+            .headline:hover {
+                font-size: 32px;
+            }
+
+            .list-container {
+                margin-top: 20px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                display: none; /* Hide the list by default */
+            }
+
+            .search-container {
+                margin-bottom: 10px;
+            }
+
+            .search-container input[type="text"] {
+                width: 200px;
+                padding: 5px;
+                font-size: 16px;
+            }
+
+            .school-list {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .school-list li {
+                margin-bottom: 10px;
+            }
+
+            .flashes {
+                color: green;
+            }
+
+        </style>
+
+        <script>
+            function searchSchools() {
+                var input = document.getElementById("search_input").value.toLowerCase();
+                var list = document.getElementsByClassName("school-list")[0];
+                var items = list.getElementsByTagName("li");
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    var text = item.innerText.toLowerCase();
+                    if (text.includes(input)) {
+                        item.style.display = "";
+                    } else {
+                        item.style.display = "none";
+                    }
+                }
+            }
+
+            function showSchoolList() {
+                var listContainer = document.getElementById("school_list_container");
+                if (listContainer.style.display === "none") {
+                    listContainer.style.display = "block";
+                } else {
+                    listContainer.style.display = "none";
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <h1><a class="headline" href="{{ url_for('home.home_page') }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+        <!-- Display flashed messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <a href="{{ url_for('home.library_list') }}" onclick="showSchoolList()">Λίστα Βιβλιοθηκών</a> &ensp;
+        <a href="{{ url_for('admin.total_borrow_history') }}">Ιστορικό Δανεισμών</a> &ensp;
+        <a href="{{ url_for('auth.logout') }}">Log Out</a>
+        <br>
+        <fieldset>
+            <h2>Επιλογές Κεντρικού Χειριστή (Admin)</h2>
+            <ul>
+                <a href="{{ url_for('admin.register_school') }}">Καταχώρηση Βιβλιοθηκών</a> <br>
+                <a href="{{ url_for('admin.approve_operator_registrations') }}">Έγκριση Αιτήσεων Εγγραφής Υπεύθυνων Χειριστών</a> <br>
+                <!-- Backup -->
+                <form action="{{ url_for('admin.create_backup') }}" method="post">
+                    <input type="submit" value="Δημιουργία Αντίγραφου Ασφάλειας (Backup)">
+                </form>
+                <!-- Restore -->
+                <form action="{{ url_for('admin.restore_system') }}" method="post" enctype="multipart/form-data">
+                    <label for="restore_file">Επιλογή αρχείου για επαναφορά:</label>
+                    <input type="file" id="restore_file" name="backup_file" accept=".sql">
+                    <input type="submit" value="Επαναφορά Συστήματος (Restore)">
+                </form>
+            </ul>
+        </fieldset>
+
+        <div class="list-container" id="school_list_container">
+            <h3>Λίστα Σχολικών Μονάδων</h3>
+            <div class="search-container">
+                <input type="text" id="search_input" placeholder="Αναζήτηση..." onkeyup="searchSchools()">
+            </div>
+            <ul class="school-list">
+                {% for school in schools %}
+                <li>{{ school }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </body>
+</html>

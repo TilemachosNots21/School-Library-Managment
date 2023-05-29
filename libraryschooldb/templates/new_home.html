@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!--Allowing the page to appear evenly in the respective device (preventing desktop view on mobile).-->
+        <meta name="viewport" content="width=device-width" initial-scale="1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <!--Title Displayed in the Browser Tab.-->
+        <title>Αρχική Σελίδα</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+            }
+
+            .header {
+                background-color: crimson;
+                height: 50px;
+                padding: 20px;
+                color: blanchedalmond;
+            }
+
+            .header h1 {
+                margin: 0;
+            }
+
+            .header-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .headline {
+                text-decoration: none;
+                color: blanchedalmond;
+                font-size: 30px;
+            }
+
+            .headline:hover {
+                font-size: 31px;
+            }
+
+            .links {
+                display: flex;
+            }
+
+            .links a{
+                margin-right: 10px;
+                color: blanchedalmond;
+                text-decoration: none;
+            }
+
+            .links:hover {
+                color: crimson;
+            }
+
+            .login-icon {
+                margin-right: 8px;
+                transition: transform 0.2s;
+            }
+
+            .login-icon:hover {
+                transform: scale(1.1);
+            }
+
+            .login-text {
+                margin-left: 3px;
+            }
+
+            .options {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 80px;
+            }
+
+            .option-box {
+                border-radius: 10px;
+                border: 2px solid crimson;
+                background-color: rgba(255, 200, 200, 0.5);
+                padding: 10px;
+            }
+
+            .blue-button {
+                background-color: blue;
+                border: none;
+                color: white;
+                padding: 7px 15px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+
+            .blue-button:hover {
+                background-color: crimson;
+            }
+
+             .book-icon {
+                margin-right: 8px;
+                transition: transform 0.2s;
+            }
+
+            .book-icon:hover {
+                transform: scale(1.1);
+            }
+
+            .form-group {
+                margin-bottom: 10px;
+            }
+        </style>
+        <script>
+            function togglePhoneNumber() {
+                var role = document.querySelector('input[name="role"]:checked').value;
+                var phoneNumberField = document.getElementById('phone_number_field');
+                if (role === 'operator') {
+                    phoneNumberField.style.display = 'block';
+                } else {
+                    phoneNumberField.style.display = 'none';
+                }
+            }
+            window.onload = togglePhoneNumber;
+        </script>
+    </head>
+    <body>
+        <div class="header">
+            <div class="header-content">
+              <h1><a class="headline" href="{{ url_for('home.home_page') }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+                <a><i class="fa fa-book book-icon">
+                        <span class="login-text">Οδηγός Χρήστη</span>
+                    </i></a>
+            </div>
+        </div>
+        <br>
+        <div class="options">
+            <div class="option-box">
+                <h2>Είσοδος</h2> <br>
+                <form action="{{ url_for('auth.login') }}" method="POST">
+                    <label for="username1">Όνομα Χρήστη:</label>
+                    <input id="username1" type="text"> <br>
+                    <br>
+                    <label for="password1">Κωδικός:</label>
+                    <input id="password1" type="password"> <br>
+                    <br>
+                    <button class="blue-button">
+                        <i class="fas fa-sign-in-alt login-icon">
+                            <span class="login-text">Είσοδος</span>
+                        </i>
+                    </button>
+                </form>
+                <a class="links" href="request_reset_password.html">Ξέχασες τον κωδικό σου;</a>
+            </div>
+            <div class="option-box">
+                <form method="POST" action="{{ url_for('auth.register') }}"> <!--we might wanna change that depending on how we actually register-->
+                    <h2>Εγγραφή Χρήστη</h2> <br>
+                    <label for="username2">Όνομα Χρήστη (username):</label>
+                    <input id="username2" name="username", type="text", placeholder="Username" required> <br>
+                    <br>
+                    <label for="name">Όνομα:</label>
+                    <input id="name", name="name", type="text", placeholder="Όνομα" required> <br>
+                    <br>
+                    <label for="surname">Επίθετο:</label>
+                    <input id="surname", name="surname", type="text", placeholder="Επίθετο" required> <br>
+                    <br>
+                    <label for="birthdate">Ημερομηνία Γέννησης:</label>
+                    <input id="birthdate", name="birthdate", type="date",placeholder="Ημ/νία Γέννησης" required> <br>
+                    <br>
+                    <label for="email">E-mail:</label>
+                    <input id="email", name="email", type="text", placeholder="E-mail" required> <br>
+                    <br>
+                    <div id="phone_number_field" style="display: none;">
+                        <label for="phone_number">Τηλέφωνο:</label>
+                        <input id="phone_number", name="phone_number", type="tel", placeholder="Τηλέφωνο"> <br>
+                        <br>
+                    </div>
+                    <label for="password2">Κωδικός:</label>
+                    <input id="password2", name="password", type="password", placeholder="Κωδικός" required> <br>
+                    <br>
+                    <label for="school_unit">Σχολική Μονάδα:</label>
+                    <select id="school_unit" name="school_unit" required>
+                        {% for unit in school_units %}
+                            <option value="{{ unit }}">{{ unit }}</option>
+                        {% endfor %}
+                    </select> <br>
+                    <br>
+                    <h4>Κατηγορία Χρήστη:</h4> <br>
+                    <div>
+                        <input id="operator", name="user_role", value="operator", type="radio" onclick="togglePhoneNumber()" required>
+                        <label for="operator">Διαχειριστής</label> <br>
+                        <br>
+                        <input id="teacher", name="user_role", value="teacher", type="radio" onclick="togglePhoneNumber()" required>
+                        <label for="teacher">Εκπαιδευτικός</label> <br>
+                        <br>
+                        <input id="student", name="user_role", value="student", type="radio" onclick="togglePhoneNumber()" required>
+                        <label for="student">Μαθητής</label> <br>
+                        <br>
+                    </div>
+                    <button class="blue-button">
+                        <i class="fas fa-sign-in-alt login-icon">
+                            <span class="login-text">Εγγραφή</span>
+                        </i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

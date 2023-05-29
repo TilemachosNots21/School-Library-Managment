@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Λίστα Βιβλιοθηκών</title>
+
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
+            }
+
+            h1 {
+                color: red;
+            }
+
+            .headline {
+                text-decoration: none;
+                color: red;
+                font-size: 30px;
+            }
+
+            .headline:hover {
+                font-size: 32px;
+            }
+
+            .search-form {
+                margin-top: 20px;
+                text-align: center;
+            }
+
+            .search-form input[type="text"] {
+                padding: 5px;
+                font-size: 16px;
+            }
+
+            .search-form input[type="submit"] {
+                padding: 5px 20px;
+                background-color: #4caf50;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+
+            .search-form input[type="submit"]:hover {
+                background-color: #45a049;
+            }
+
+            .schools {
+                margin-top: 20px;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+                background-color: #fff;
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            .schools .list-group {
+                list-style: none;
+                padding: 0;
+            }
+
+            .schools .list-group-item {
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a class="headline" href="{{ url_for('home.home_page') }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+        <h3><i>Βιβλιοθήκες που συμμετέχουν:</i></h3>
+        <div class="search-form">
+            <form method="POST" action="{{ url_for('home.library_list') }}">
+                {{ form.csrf_token }}
+                <input type="text" id="schoolsearch" name="search_query" placeholder="Αναζήτηση Σχολείου">
+                <br><br>
+                <input type="submit" value="Αναζήτηση">
+            </form>
+        </div>
+
+        <div class="schools">
+            <ul class="list-group">
+                {% for school in schools %}
+                    <li class="list-group-item">
+                        <strong>Όνομα Σχολείου:</strong> {{ school.School_Name }} <br>
+                        <strong>Ταχυδρομική Διεύθυνση:</strong> {{ school.Postal_Address }} <br>
+                        <strong>Πόλη:</strong> {{ school.City }} <br>
+                        <strong>Τηλέφωνο:</strong> {{ school.PhoneNumber }} <br>
+                        <strong>Email:</strong> {{ school.Email }} <br>
+                        <strong>Διευθυντής Σχολείου:</strong> {{ school.School_Director }} <br>
+                        <strong>Όνομα Διαχειριστή:</strong> {{ school.OperatorName }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </body>
+</html>

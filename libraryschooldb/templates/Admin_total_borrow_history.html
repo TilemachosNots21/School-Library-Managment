@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width", initial-scale="1.0">
+        <title>Δίκτυο Σχολικών Βιβλιοθηκών - Ιστορικό Δανεισμών ανά Σχολική μονάδα</title>
+        <style>
+            h1 {
+                color: red;
+            }
+
+            .headline {
+                text-decoration: none;
+                color: red;
+                font-size: 30px;
+            }
+
+            .headline:hover {
+                font-size: 32px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a class="headline", href="{{ url_for('home.home_page') }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+        <a href="{{ url_for('home.library_list') }}">Λίστα Βιβλιοθηκών</a> &ensp;
+        <a href="{{ url_for('admin.total_borrow_history') }}">Ιστορικό Δανεισμών</a> &ensp;
+        <a href="{{ url_for('home.home_page') }}">Οδηγός Χρήστη</a> &ensp;
+        <a href="{{ url_for('auth.logout') }}">Log Out</a>
+        <br>
+        <fieldset>
+            <h2>Επιλογές Κεντρικού Χειριστή (Admin)</h2>
+            <ul>
+                <a href="{{ url_for('admin.register_school') }}">Καταχώρηση Βιβλιοθηκών</a> <br>
+                <a href="{{ url_for('admin.approve_operator_registrations') }}">Έγκριση Αιτήσεων Εγγραφής Υπεύθυνων Χειριστών</a> <br>
+                <a href="{{ url_for('admin.create_backup') }}">Δημιουργία Αντίγραφου Ασφάλειας (Backup)</a> <br>
+                <a href="{{ url_for('admin.restore_system') }}">Επαναφορά Συστήματος (Restore)</a> <br>
+            </ul>
+        </fieldset>
+
+        <div class="borrow-history">
+            <h2>Ιστορικό Δανεισμών ανά Σχολική Μονάδα</h2>
+            <form method="POST">
+                {{ form.csrf_token }}
+                {{ form.hidden_tag() }}
+                <label>Χρονιά:</label> {{ form.year }}
+                <label>Μήνας:</label> {{ form.month }}
+                {{ form.submit() }}
+            </form>
+
+            <ul>
+            {% for loan in loans %}
+                <li>{{ loan['School_Name'] }}: {{ loan['TotalLoans'] }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+
+    </body>
+</html>
