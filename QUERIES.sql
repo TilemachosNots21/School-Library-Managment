@@ -21,7 +21,7 @@ JOIN Author a ON ba.AuthorID = a.AuthorID
 JOIN Borrow br ON b.BookID = br.BookID
 JOIN SchoolUser su ON br.SchoolUserID = su.SchoolUserID
 JOIN AppUser u ON su.SchoolUserID = u.UserID
-WHERE c.CategoryName = ? AND su.Position = 'Teacher' AND YEAR(br.Borrow_Date) = YEAR(CURDATE()) - 1;
+WHERE c.CategoryName = ? AND su.Position = 'Teacher' AND br.Borrow_Date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR);
 
 
 -- 3.1.3
