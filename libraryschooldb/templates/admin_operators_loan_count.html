@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <title>Operators Loan Count</title>
+</head>
+<body>
+    <h1>Operators who have loaned the same number of books in a year with more than 20 loans</h1>
+
+    <form action="{{ url_for('admin.operators_loan_count',role=role,username=username) }}" method="POST">
+        <label for="year">Select Year:</label>
+        <input type="number" id="year" name="year" required min="2000" max="2099" step="1">
+        <input type="submit" value="Submit">
+    </form>
+
+    {% if results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Operator ID</th>
+                    <th>Operator Name</th>
+                    <th>Number of Loans</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result['OperatorID'] }}</td>
+                        <td>{{ result['OperatorName'] }}</td>
+                        <td>{{ result['NumberOfLoans'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+    <a href="{{ url_for('admin.admin_dashboard',role=role,username=username) }}">Return to Dashboard</a>
+</body>
+</html>

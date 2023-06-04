@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <title>Authors with Five Less Books</title>
+</head>
+<body>
+    <h1>Authors who have written at least 5 books less than the author with the most books</h1>
+
+    {% if results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Author ID</th>
+                    <th>Author Name</th>
+                    <th>Book Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result['AuthorID'] }}</td>
+                        <td>{{ result['FullName'] }}</td>
+                        <td>{{ result['BookCount'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+    <a href="{{ url_for('admin.admin_dashboard',role=role,username=username) }}">Return to Dashboard</a>
+</body>
+</html>

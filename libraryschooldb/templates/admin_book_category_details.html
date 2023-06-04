@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Category Details</title>
+</head>
+<body>
+    <h1>Book Category Details</h1>
+    <form action="{{ url_for('admin.book_category_details') }}" method="POST">
+        <label for="category_name">Book Category:</label>
+        <select id="category_name" name="category_name" required>
+            <option value="">Select a category</option>
+            {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Submit">
+    </form>
+
+    {% if authors %}
+        <h2>Authors:</h2>
+        <ul>
+            {% for author in authors %}
+                <li>{{ author }}</li> <!-- just use 'author' here -->
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if teachers %}
+        <h2>Teachers who borrowed books from this category in the last year:</h2>
+        <ul>
+            {% for teacher in teachers %}
+                <li>{{ teacher }}</li> <!-- just use 'teacher' here -->
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

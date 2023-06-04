@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <title>Young Teachers' Books</title>
+</head>
+<body>
+    <h1>Young Teachers' Books</h1>
+    {% if results %}
+        <table>
+            <tr>
+                <th>Teacher Name</th>
+                <th>Number of Books</th>
+            </tr>
+            {% for result in results %}
+                <tr>
+                    <td>{{ result['TeacherName'] }}</td>
+                    <td>{{ result['NumberOfBooks'] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No data available</p>
+    {% endif %}
+    <a href="{{ url_for('admin.admin_dashboard',role=role,username=username) }}">Back to Dashboard</a>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <title>Authors of Unborrowed Books</title>
+</head>
+<body>
+    <h1>Authors of Unborrowed Books</h1>
+    {% if authors %}
+        <ul>
+            {% for author in authors %}
+                <li>{{ author }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+    <a href="{{ url_for('admin.admin_dashboard',role=role,username=username) }}">Return to Dashboard</a>
+</body>
+</html>
