@@ -3,7 +3,7 @@ from MySQLdb.cursors import DictCursor
 from flask_mysqldb import MySQL
 from libraryschooldb import db  # initially created by __init__.py, need to be used here
 from libraryschooldb.oper import operator
-from libraryschooldb.oper.forms import InsertBookForm, BookSearchForm, EditBookForm
+from libraryschooldb.oper.forms import InsertBookForm, BookSearchForm, EditBookForm , SearchBooksForm, SearchBorrowersForm, SearchRatingsForm
 
 
 @operator.route('/login/<role>/<user_id>/<username>', methods=['GET', 'POST'])
@@ -538,6 +538,105 @@ def borrowings_handling(role, user_id, username):
         db.connection.commit()
 
     return render_template('borrowings_handling.html', role=role, user_id=user_id, username=username, borrowings=borrowings)
+
+
+@operator.route('/login/<role>/<user_id>/<username>/search_books', methods=['GET', 'POST'])
+def search_books(role,user_id,username):
+    form = SearchBooksForm()
+    if form.validate_on_submit():
+        title = '%' + form.title.data + '%'  # Adding '%' to use the LIKE operator
+        author = '%' + form.author.data + '%'
+        category = '%' + form.category.data + '%'
+
+        # Get the School ID of the operator (assuming you have a way to get the current operator's ID)
+        operator_id = session['user_id']
+        cursor = db.connection.cursor(DictCursor)
+        cursor.execute("SELECT SchoolID FROM Operator WHERE OperatorID = %s", [operator_id])
+        school_id = cursor.fetchone()['SchoolID']
+
+        query = """
+        SELECT B.Title, GROUP_CONCAT(A.FullName SEPARATOR ', ') AS Authors
+        FROM Book B 
+        JOIN BookAuthor BA ON B.BookID = BA.BookID
+        JOIN Author A ON BA.AuthorID = A.AuthorID
+        JOIN BookCategory BC ON B.BookID = BC.BookID
+        JOIN Category C ON BC.CategoryID = C.CategoryID
+        WHERE B.Title LIKE %s AND A.FullName LIKE %s AND B.SchoolID = %s AND C.CategoryName LIKE %s AND EXISTS (
+            SELECT 1 FROM BookCopy BC WHERE BC.BookID = B.BookID )
+        GROUP BY B.BookID;
+        """
+        cursor.execute(query, [title, author, school_id, category])
+        results = cursor.fetchall()
+        for result in results:
+            result['Authors'] = result['Authors'].split(', ')
+        cursor.close()
+
+        return render_template('operator_search_books.html', form=form, results=results,role=role,username=username,user_id=user_id)
+
+    return render_template('operator_search_books.html', form=form, role=role,username=username,user_id=user_id)
+
+
+@operator.route('/login/<role>/<user_id>/<username>/search_borrowers', methods=['GET', 'POST'])
+def search_borrowers(role, user_id, username):
+    form = SearchBorrowersForm()
+    if form.validate_on_submit():
+        first_name = '%' + form.first_name.data + '%'
+        last_name = '%' + form.last_name.data + '%'
+        delay_days = form.delay_days.data
+
+        query = """
+        SELECT su.FirstName, su.LastName, b.BookID, DATEDIFF(CURDATE(), bo.Due_Date) AS DelayDays
+        FROM Borrow bo
+        JOIN SchoolUser su ON bo.SchoolUserID = su.SchoolUserID
+        JOIN Book b ON bo.BookID = b.BookID
+        WHERE su.FirstName LIKE %s
+        AND su.LastName LIKE %s
+        AND bo.Borrow_Status = 'Overdue'
+        AND DATEDIFF(CURDATE(), bo.Due_Date) > %s
+        """
+        cursor = db.connection.cursor(DictCursor)
+        cursor.execute(query, [first_name, last_name, delay_days])
+        results = cursor.fetchall()
+        cursor.close()
+
+        return render_template('operator_search_borrowers.html', form=form, results=results, role=role, username=username, user_id=user_id)
+
+    return render_template('operator_search_borrowers.html', form=form, role=role, username=username, user_id=user_id)
+
+
+@operator.route('/login/<role>/<user_id>/<username>/search_ratings', methods=['GET', 'POST'])
+def search_ratings(role, user_id, username):
+    form = SearchRatingsForm()
+    if form.validate_on_submit():
+        first_name = '%' + form.first_name.data + '%'
+        last_name = '%' + form.last_name.data + '%'
+        category = '%' + form.category.data + '%'
+
+        operator_id = session['user_id']
+
+        query = """
+        SELECT SU.FirstName, SU.LastName, C.CategoryName, AVG(R.Likert) AS AverageRating
+        FROM Review R
+        JOIN SchoolUser SU ON R.SchoolUserID = SU.SchoolUserID
+        JOIN Book B ON R.BookID = B.BookID
+        JOIN BookCategory BC ON B.BookID = BC.BookID
+        JOIN Category C ON BC.CategoryID = C.CategoryID
+        JOIN Operator O ON R.OperatorID = O.OperatorID
+        WHERE SU.FirstName LIKE %s
+        AND SU.LastName LIKE %s
+        AND C.CategoryName LIKE %s
+        AND O.OperatorID = %s
+        GROUP BY SU.FirstName, SU.LastName, C.CategoryName
+        """
+        cursor = db.connection.cursor(DictCursor)
+        cursor.execute(query, [first_name, last_name, category, operator_id])
+        results = cursor.fetchall()
+        cursor.close()
+
+        return render_template('operator_search_ratings.html', form=form, results=results, role=role, username=username, user_id=user_id)
+
+    return render_template('operator_search_ratings.html', form=form, role=role, username=username, user_id=user_id)
+
 
 
 

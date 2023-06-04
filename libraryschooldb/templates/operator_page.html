@@ -25,6 +25,9 @@
     <body>
         <h1><a class="headline" href="{{ url_for('oper.operator_dashboard', role=role, user_id=user_id, username=username) }}">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
         <a>Οδηγός Χρήστη</a> &ensp;
+        <a href="{{ url_for('oper.search_books', role=role, user_id=user_id, username=username) }}">Search Books (Query 3.2.1)</a> &ensp;
+        <a href="{{ url_for('oper.search_borrowers', role=role, user_id=user_id, username=username) }}">Search Late Borrowers (Query 3.2.2)</a> &ensp;
+        <a href="{{ url_for('oper.search_ratings', role=role, user_id=user_id, username=username) }}">Search Average Ratings (Query 3.2.3)</a> &ensp;
         <a href="{{url_for('auth.logout')}}">Log Out</a> <br>
         <br>
         <fieldset>

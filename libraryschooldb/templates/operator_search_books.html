@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <title>Search Books</title>
+</head>
+<body>
+    <h1>Search Books</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title }}
+        </p>
+        <p>
+            {{ form.author.label }}<br>
+            {{ form.author }}
+        </p>
+        <p>
+            {{ form.category.label }}<br>
+            {{ form.category }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+
+    {% if results is defined %}
+        <h2>Search Results</h2>
+
+        {% if results %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <td>{{ result['Title'] }}</td>
+                            <td>
+                                {% for author in result['Authors'] %}
+                                    {{ author }}
+                                    {% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No books found.</p>
+        {% endif %}
+    {% endif %}
+
+    <a href="{{ url_for('oper.operator_dashboard',role=role,username=username,user_id=user_id) }}">Return to Dashboard</a>
+</body>
+</html>

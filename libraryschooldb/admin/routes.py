@@ -213,8 +213,8 @@ def book_category_details():
     teachers = []
 
     if request.method == 'POST':
-        category_name = request.form['category_name']  # Get the selected book category from the form data
-        # Perform the SQL query
+        category_name = request.form['category_name']
+
         query = """
         SELECT a.FullName AS AuthorName, CONCAT(u.FirstName, ' ', u.LastName) AS TeacherName
         FROM Category c

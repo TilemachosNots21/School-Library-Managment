@@ -9,7 +9,7 @@ class AtLeastOneGenre(ValidationError):
     def __call__(self, form, field):
         genres = form.genres.data
         new_genre = form.new_genre.data
-        # Check if at least one genre has been selected or input
+
         if not genres and not new_genre:
             raise ValidationError("Please select at least one genre or enter a new one.")
 
@@ -39,9 +39,34 @@ class EditBookForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     isbn = StringField('ISBN', validators=[DataRequired()])
     publisher = StringField('Publisher', validators=[DataRequired()])
-    authors = TextAreaField('Authors')  # This assumes authors are entered as comma-separated values in a textarea
-    categories = TextAreaField('Categories')  # Same assumption for categories
-    keywords = TextAreaField('Keywords')  # Same assumption for keywords
+    authors = TextAreaField('Authors')
+    categories = TextAreaField('Categories')
+    keywords = TextAreaField('Keywords')
     available_copies = StringField('Available Copies', validators=[DataRequired()])
     submit = SubmitField('Update')
+
+
+# For the query 3.2.1
+
+class SearchBooksForm(FlaskForm):
+    title = StringField('Title', [validators.optional()])
+    author = StringField('Author', [validators.optional()])
+    category = StringField('Category', [validators.optional()])
+    submit = SubmitField('Search')
+
+
+class SearchBorrowersForm(FlaskForm):
+    first_name = StringField('First Name', [validators.optional()])
+    last_name = StringField('Last Name', [validators.optional()])
+    delay_days = IntegerField('Delay Days', [validators.optional()])
+    submit = SubmitField('Search')
+
+
+class SearchRatingsForm(FlaskForm):
+    first_name = StringField('First Name', [validators.optional()])
+    last_name = StringField('Last Name', [validators.optional()])
+    category = StringField('Category', [validators.optional()])
+    submit = SubmitField('Search')
+
+
 
