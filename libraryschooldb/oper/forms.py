@@ -1,7 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import validators, SubmitField, SelectField, StringField, IntegerField, TextAreaField, Form, FieldList, \
-    FormField, BooleanField
-from wtforms.validators import DataRequired, NumberRange
+    FormField, BooleanField, SelectMultipleField
+from wtforms.validators import DataRequired, NumberRange, ValidationError
+
+
+class AtLeastOneGenre(ValidationError):
+
+    def __call__(self, form, field):
+        genres = form.genres.data
+        new_genre = form.new_genre.data
+        # Check if at least one genre has been selected or input
+        if not genres and not new_genre:
+            raise ValidationError("Please select at least one genre or enter a new one.")
 
 
 class InsertBookForm(FlaskForm):
@@ -13,8 +23,7 @@ class InsertBookForm(FlaskForm):
     description = TextAreaField('Περιγραφή')
     number_of_copies = IntegerField('Διαθέσιμα Αντίτυπα', validators=[DataRequired(),NumberRange(min=1)])
     image_url = StringField('Εικόνα', [validators.URL(message='Must be a valid URL'), ])
-    genre_leverage = BooleanField('Εισαγωγή Νέου Είδους/Κατηγορίας')
-    genres = SelectField('Είδος/Κατηγορία', choices=[], validators=[DataRequired()])
+    genres = SelectMultipleField('Είδος/Κατηγορία', choices=[], validators=[AtLeastOneGenre()])
     new_genre = StringField('Νέο είδος/κατηγορία')
     language = SelectField('Γλώσσα', choices=[('0', '-'), ('1', 'Ελληνικά'), ('2', 'Αγγλικά'), ('3', 'Γερμανικά'), ('4', 'Γαλλικά')], validators=[DataRequired()])
     keywords = FieldList(StringField('Λέξεις Κλειδιά'), min_entries=1, validators=[DataRequired()])

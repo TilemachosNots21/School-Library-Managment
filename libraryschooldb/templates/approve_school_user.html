@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Εκκρεμείς Αιτήσεις Χρηστών Σχολικής Μονάδας</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #ff0000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        form {
+            display: inline;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Εκκρεμείς Αιτήσεις Χρηστών Σχολικής Μονάδας</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div>
+            {% for category, message in messages %}
+                <p style="color: {{ 'green' if category == 'success' else 'red' }};">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Όνομα</th>
+                <th>Επώνυμο</th>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Ρόλος</th>
+                <th>Ενέργειες</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in school_user_requests %}
+            <tr>
+                <td>{{ request.FirstName }}</td>
+                <td>{{ request.LastName }}</td>
+                <td>{{ request.Email }}</td>
+                <td>{{ request.Username }}</td>
+                <td>{{ request.Role_Type }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('oper.approve_school_user_registrations',role=role, user_id=user_id, username=username) }}">
+                        <input type="hidden" name="username" value="{{ request.Username }}">
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit">Έγκριση</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('oper.approve_school_user_registrations',role=role, user_id=user_id, username=username) }}">
+                        <input type="hidden" name="username" value="{{ request.Username }}">
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit">Απόρριψη</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

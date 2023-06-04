@@ -22,17 +22,21 @@ def insert_book(role, user_id, username):
         form.genres.choices = [(row['CategoryID'], row['CategoryName']) for row in categories]
 
         if form.validate_on_submit():
-            if form.genre_leverage.data:
-                genre_name = form.new_genre.data
-                cursor.execute('SELECT * FROM Category WHERE CategoryName = %s;', [genre_name])
-                if not cursor.fetchone():
-                    cursor.execute('INSERT INTO Category (CategoryName) VALUES (%s);', [genre_name])
+            # Allow multiple genres to be selected.
+            genre_ids = []
+            genre_ids.extend(form.genres.data)
+
+            if form.new_genre.data:
+                new_genre_name = form.new_genre.data
+                cursor.execute('SELECT * FROM Category WHERE CategoryName = %s;', [new_genre_name])
+                genre_row = cursor.fetchone()
+                if not genre_row:
+                    cursor.execute('INSERT INTO Category (CategoryName) VALUES (%s);', [new_genre_name])
                     db.connection.commit()
-                    genre = cursor.lastrowid
+                    new_genre_id = cursor.lastrowid
                 else:
-                    genre = cursor.fetchone()['CategoryID']
-            else:
-                genre = form.genres.data
+                    new_genre_id = genre_row['CategoryID']
+                genre_ids.append(new_genre_id)
 
             isbn = form.isbn.data
             title = form.title.data
@@ -54,7 +58,8 @@ def insert_book(role, user_id, username):
 
             book_id = cursor.lastrowid
 
-            cursor.execute('INSERT INTO BookCategory(BookID, CategoryID) VALUES(%s, %s);', [book_id, genre])
+            for genre_id in genre_ids:
+                cursor.execute('INSERT INTO BookCategory(BookID, CategoryID) VALUES(%s, %s);', [book_id, genre_id])
 
             for author in authors:
                 cursor.execute('SELECT * FROM Author WHERE FullName = %s;', [author])
@@ -99,68 +104,6 @@ def insert_book(role, user_id, username):
     return render_template('insert_book.html', form=form, role=role, user_id=user_id, username=username, categories=categories)
 
 
-def fetch_books(cursor, school_id):
-    cursor.execute("SELECT BookID, Title, ISBN, Publisher "
-                   "FROM Book "
-                   "WHERE SchoolID = %s", (school_id,))
-    return cursor.fetchall()
-
-
-def fetch_categories(cursor, book_ids):
-    cursor.execute(
-        "SELECT BookID, GROUP_CONCAT(CategoryName SEPARATOR ',') AS Categories"
-        "FROM BookCategory Bc INNER JOIN Category C ON Bc.CategoryID = C.CategoryID "
-        "WHERE BookID IN (%s) "
-        "GROUP BY BookID",(book_ids,))
-    return cursor.fetchall()
-
-
-def fetch_keywords(cursor, book_ids):
-    cursor.execute(
-        "SELECT BookID, GROUP_CONCAT(KeywordText SEPARATOR ', ') AS Keywords "
-        "FROM BookKeywords Bk INNER JOIN Keywords K ON Bk.KeywordID = K.KeywordID "
-        "WHERE BookID IN (%s) "
-        "GROUP BY BookID",(book_ids,))
-    return cursor.fetchall()
-
-
-def fetch_copies(cursor, book_ids):
-    cursor.execute("SELECT BookID, COUNT(*) AS TotalCopies FROM BookCopy WHERE BookID IN (%s) GROUP BY BookID",
-                   (book_ids,))
-    return cursor.fetchall()
-
-
-def fetch_search_books(cursor, search_term, school_id):
-    cursor.callproc('SearchBook', [search_term, school_id])
-    return cursor.fetchall()
-
-
-def book_data_combined(books_in_school, categories, keywords, copies):
-    book_list = []
-    for book in books_in_school:
-        book_dict = {'BookID': book['BookID'], 'Title': book['Title'], 'ISBN': book['ISBN'],
-                     'Publisher': book['Publisher'], 'Categories': '', 'Keywords': '', 'TotalCopies': ''}
-
-        # Add additional data to the dictionary
-        for category in categories:
-            if category['BookID'] == book['BookID']:
-                book_dict['Categories'] = category['Categories']
-                break
-
-        for keyword in keywords:
-            if keyword['BookID'] == book['BookID']:
-                book_dict['Keywords'] = keyword['Keywords']
-                break
-
-        for copy in copies:
-            if copy['BookID'] == book['BookID']:
-                book_dict['TotalCopies'] = copy['TotalCopies']
-                break
-
-        book_list.append(book_dict)
-    return book_list
-
-
 @operator.route('/login/<role>/<user_id>/<username>/books_list', methods=['GET', 'POST'])
 def book_list(role, user_id, username):
     form = BookSearchForm()
@@ -172,24 +115,74 @@ def book_list(role, user_id, username):
     cursor.execute("SELECT SchoolID FROM Operator WHERE OperatorID = %s", (operator_id,))
     school_id = cursor.fetchone()['SchoolID']
 
-    try:
-        if form.validate_on_submit():
-            search_term = form.search.data
-            books_in_school = fetch_search_books(cursor, search_term, school_id)
-        else:
-            books_in_school = fetch_books(cursor, school_id)
+    if form.validate_on_submit():
+        search_term = form.search.data
+        cursor.callproc('SearchBook', [search_term, school_id])
+        books_in_school = cursor.fetchall()
+    else:
+        cursor.execute("SELECT B.BookID, B.Title, B.ISBN, B.Publisher, B.Image, "
+                       "GROUP_CONCAT(A.FullName SEPARATOR ', ') AS Authors "
+                       "FROM Book AS B "
+                       "INNER JOIN BookAuthor AS BA ON B.BookID = BA.BookID "
+                       "INNER JOIN Author AS A ON BA.AuthorID = A.AuthorID "
+                       "WHERE B.SchoolID = %s "
+                       "GROUP BY B.BookID", (school_id,))
+        books_in_school = cursor.fetchall()
 
-        book_ids = tuple(book['BookID'] for book in books_in_school)
+    book_ids = tuple(book['BookID'] for book in books_in_school)
 
-        categories = fetch_categories(cursor, book_ids)
-        keywords = fetch_keywords(cursor, book_ids)
-        copies = fetch_copies(cursor, book_ids)
+    cursor.execute(
+        "SELECT BookID, GROUP_CONCAT(CategoryName SEPARATOR ',') AS Categories "
+        "FROM BookCategory Bc INNER JOIN Category C ON Bc.CategoryID = C.CategoryID "
+        "WHERE BookID IN %s "
+        "GROUP BY BookID", (book_ids,))
+    categories = cursor.fetchall()
 
-        books_list = book_data_combined(books_in_school, categories, keywords, copies)
-    except Exception as e:
-        flash(str(e), "danger")
+    cursor.execute(
+        "SELECT BookID, GROUP_CONCAT(KeywordText SEPARATOR ', ') AS Keywords "
+        "FROM BookKeywords Bk INNER JOIN Keywords K ON Bk.KeywordID = K.KeywordID "
+        "WHERE BookID IN %s "
+        "GROUP BY BookID", (book_ids,))
+    keywords = cursor.fetchall()
 
-    return render_template('oper_books_list.html', form=form, role=role, user_id=user_id, username=username, books_list=books_list)
+    cursor.execute("SELECT BookID, COUNT(*) AS TotalCopies FROM BookCopy WHERE BookID IN %s GROUP BY BookID",
+                   (book_ids,))
+    copies = cursor.fetchall()
+
+    book_list = []
+    for book_data in books_in_school:
+        book_dict = {
+            'BookID': book_data['BookID'],
+            'Title': book_data['Title'],
+            'ISBN': book_data['ISBN'],
+            'Publisher': book_data['Publisher'],
+            'Authors': book_data['Authors'],
+            'Categories': '',
+            'Keywords': '',
+            'TotalCopies': '',
+            'Image': book_data['Image']
+        }
+
+        for category in categories:
+            if category['BookID'] == book_data['BookID']:
+                book_dict['Categories'] = category['Categories']
+                break
+
+        for keyword in keywords:
+            if keyword['BookID'] == book_data['BookID']:
+                book_dict['Keywords'] = keyword['Keywords']
+                break
+
+        for copy in copies:
+            if copy['BookID'] == book_data['BookID']:
+                book_dict['TotalCopies'] = copy['TotalCopies']
+                break
+
+        book_list.append(book_dict)
+
+    return render_template('oper_books_list.html', form=form, role=role, user_id=user_id, username=username,
+                           books_list=book_list)
+
 
 
 @operator.route('/login/<role>/<user_id>/<username>/edit_book/<book_id>', methods=['GET', 'POST'])
@@ -284,6 +277,267 @@ def edit_book(role,user_id,username,book_id):
             form.copies.data = book['Copies']
 
     return render_template('edit_book.html', form=form, book_id=book_id, user_id=user_id,role=role,username=username)
+
+
+@operator.route('/login/<role>/<user_id>/<username>/delete_book/<book_id>', methods=['POST'])
+def delete_book(role, user_id, username, book_id):
+    cursor = db.connection.cursor()
+
+    try:
+        # Delete book copies
+        cursor.execute('DELETE FROM BookCopy WHERE BookID = %s;', (book_id,))
+
+        # Delete book-category relationships
+        cursor.execute('DELETE FROM BookCategory WHERE BookID = %s;', (book_id,))
+
+        # Delete book-author relationships
+        cursor.execute('DELETE FROM BookAuthor WHERE BookID = %s;', (book_id,))
+
+        # Delete book-keyword relationships
+        cursor.execute('DELETE FROM BookKeywords WHERE BookID = %s;', (book_id,))
+
+        # Delete book
+        cursor.execute('DELETE FROM Book WHERE BookID = %s;', (book_id,))
+
+        db.connection.commit()
+
+        flash('Book successfully deleted!', 'success')
+    except Exception as e:
+        db.connection.rollback()
+        flash('An error occurred. Please try again.', 'error')
+
+    return redirect(url_for('oper.book_list', role=role, user_id=user_id, username=username))
+
+
+@operator.route('/login/<role>/<user_id>/<username>/approve_registration', methods=['GET', 'POST'])
+def approve_school_user_registrations(role, user_id, username):
+    if 'username' not in session or session.get('role') != 'operator':
+        flash('Permission denied.')
+        return redirect(url_for('home.home_page'))
+
+    try:
+        cursor = db.connection.cursor(DictCursor)
+        cursor.execute("SELECT SchoolID From Operator WHERE OperatorID = %s", (session['user_id'],))
+        school_id = cursor.fetchone()['SchoolID']
+
+        query = "SELECT FirstName, LastName, Email, Username, Role_Type " \
+                "FROM RegistrationRequest " \
+                "WHERE (Role_Type = 'student' OR Role_Type = 'teacher') AND School_Unit = %s"
+        cursor.execute(query, (school_id,))
+        school_user_requests = cursor.fetchall()
+
+        if request.method == 'POST':
+            username = request.form.get('username')
+            action = request.form.get('action')
+
+            if action == 'approve':
+                cursor.execute("SELECT * FROM RegistrationRequest WHERE Username = %s", (username,))
+                selected_user = cursor.fetchone()
+                cursor.execute("DELETE FROM RegistrationRequest WHERE RequestID = %s",
+                               (selected_user['RequestID'],))
+                cursor.execute("SELECT School_Name FROM School_Unit WHERE SchoolID = %s", (school_id,))
+                school_name = cursor.fetchone()['School_Name']
+                query2 = "CALL InsertSchoolUser(%s, %s, %s, %s, %s, %s, %s, %s)"
+                cursor.execute(query2, (selected_user['FirstName'], selected_user['LastName'], selected_user['Email'],
+                                        selected_user['Username'], selected_user['Password'], selected_user['Role_Type'],
+                                        selected_user['BirthDate'], school_id))
+                flash('The request from user {} has been successfully approved.'.format(username), 'success')
+                return redirect(url_for('oper.approve_school_user_registrations', role=role, user_id=user_id, username=username))
+            elif action == 'reject':
+                cursor.execute("SELECT RequestID FROM RegistrationRequest WHERE Username = %s", (username,))
+                selected_user = cursor.fetchone()
+                cursor.execute("DELETE FROM RegistrationRequest WHERE RequestID = %s",
+                               (selected_user['RequestID'],))
+                flash('The request from user {} has been successfully rejected.'.format(username), 'success')
+                return redirect(url_for('oper.approve_school_user_registrations', role=role, user_id=user_id, username=username))
+            else:
+                flash('Invalid action.', 'error')
+                return redirect(url_for('oper.approve_school_user_registrations', role=role, user_id=user_id, username=username))
+    except Exception as e:
+        flash(str(e), "error")
+    finally:
+        cursor.close()
+        db.connection.commit()
+
+    return render_template('approve_school_user.html', role=role, user_id=user_id, username=username, school_user_requests=school_user_requests)
+
+
+@operator.route('/login/<role>/<user_id>/<username>/show_users', methods=['GET', 'POST'])
+def show_users(role,user_id,username):
+    if 'username' not in session or session.get('role') != 'operator':
+        flash('Permission denied.')
+        return redirect(url_for('home.home_page'))
+
+    try:
+        cursor = db.connection.cursor(DictCursor)
+        cursor.execute("SELECT SchoolID From Operator WHERE OperatorID = %s", (session['user_id'],))
+        school_id = cursor.fetchone()['SchoolID']
+
+        query = "SELECT Au.FirstName, Au.LastName, Au.Email, Au.Username, Su.Position " \
+                "FROM AppUser Au INNER JOIN SchoolUser Su ON Au.UserID = Su.SchoolUserID  " \
+                "WHERE Su.SchoolID = %s"
+        cursor.execute(query, (school_id,))
+        school_users = cursor.fetchall()
+
+        if request.method == 'POST':
+            username = request.form.get('username')
+            action = request.form.get('action')
+
+            cursor.execute("SELECT UserID FROM AppUser WHERE Username = %s", (username,))
+            selected_user = cursor.fetchone()
+            cursor.execute("DELETE FROM AppUser WHERE UserID = %s",
+                               (selected_user['UserID'],))
+            flash('User {} has been successfully suspended (deleted).'.format(username), 'success')
+            return redirect(url_for('oper.show_users', role=role, user_id=user_id, username=username))
+
+    except Exception as e:
+        flash(str(e), "error")
+    finally:
+        cursor.close()
+        db.connection.commit()
+
+    return render_template('show_school_users.html',role=role,user_id=user_id,username=username,school_users=school_users)
+
+
+@operator.route('/login/<role>/<user_id>/<username>/show_reservations', methods=['GET', 'POST'])
+def reservations_handling(role, user_id, username):
+    if 'username' not in session or session.get('role') != 'operator':
+        flash('Permission denied.')
+        return redirect(url_for('home.home_page'))
+
+    try:
+        cursor = db.connection.cursor(DictCursor)
+        cursor.execute("SELECT SchoolID FROM Operator WHERE OperatorID = %s", (session['user_id'],))
+        school_id = cursor.fetchone()['SchoolID']
+
+        reservations = []
+
+        if request.method == 'POST':
+            reservation_type = request.form.get('reservation_type')
+            time_period = request.form.get('time_period')
+            action = request.form.get('action')
+            reservation_id = request.form.get('reservation_id')
+
+            query = "SELECT r.ReservationID, r.Submitted_DateTime AS BorrowDate, r.Acceptance_Date AS ReturnDate, r.ReservationStatus AS Status, au.Username, bk.Title AS BookTitle FROM Reservation r " \
+                    "JOIN AppUser au ON r.SchoolUserID = au.UserID " \
+                    "JOIN Book bk ON r.BookID = bk.BookID " \
+                    "WHERE r.SchoolUserID IN (SELECT SchoolUserID FROM SchoolUser WHERE SchoolID = %s)"
+
+            if reservation_type != "all":
+                query += f" AND r.ReservationStatus = {reservation_type}"
+
+            if time_period:
+                query += f" AND r.Submitted_DateTime >= DATE_SUB(CURRENT_DATE, INTERVAL {time_period} DAY)"
+
+            cursor.execute(query, (school_id,))
+            rows = cursor.fetchall()
+
+            reservations = [
+                {"ReservationID": row['ReservationID'], "Username": row['Username'], "BookTitle": row['Title'],
+                 "BorrowDate": row['Submitted_DateTime'], "ReturnDate": row['Acceptance_Date'],
+                 "Status": row['ReservationStatus']} for row in rows]
+
+            if action and reservation_id:
+                if action == 'accept':
+                    cursor.execute("UPDATE Reservation SET ReservationStatus = 'Accepted' WHERE ReservationID = %s",
+                                   (reservation_id,))
+                elif action == 'reject':
+                    cursor.execute("UPDATE Reservation SET ReservationStatus = 'Cancelled' WHERE ReservationID = %s",
+                                   (reservation_id,))
+
+            for reservation in reservations:
+                if reservation['Status'] == 'Pending':
+                    reservation['Status'] = 'Εκκρεμείς'
+                elif reservation['Status'] == 'Accepted':
+                    reservation['Status'] = 'Αποδεκτές'
+                elif reservation['Status'] == 'Completed':
+                    reservation['Status'] = 'Ολοκληρωμένες'
+                elif reservation['Status'] == 'Cancelled':
+                    reservation['Status'] = 'Ακυρωμένες'
+                else:
+                    reservation['Status'] = 'Άγνωστο'
+
+        elif request.method == 'GET':
+            query = "SELECT r.ReservationID, r.Submitted_DateTime AS BorrowDate, r.Acceptance_Date AS ReturnDate, r.ReservationStatus AS Status, au.Username, bk.Title AS BookTitle FROM Reservation r " \
+                    "JOIN AppUser au ON r.SchoolUserID = au.UserID " \
+                    "JOIN Book bk ON r.BookID = bk.BookID " \
+                    "WHERE r.SchoolUserID IN (SELECT SchoolUserID FROM SchoolUser WHERE SchoolID = %s)"
+            cursor.execute(query, (school_id,))
+            rows = cursor.fetchall()
+            reservations = [{"ReservationID": row[0], "Username": row[1], "BookTitle": row[2],
+                             "BorrowDate": row[3], "ReturnDate": row[4], "Status": row[5]} for row in rows]
+
+            for reservation in reservations:
+                if reservation['Status'] == 'Pending':
+                    reservation['Status'] = 'Εκκρεμείς'
+                elif reservation['Status'] == 'Accepted':
+                    reservation['Status'] = 'Αποδεκτές'
+                elif reservation['Status'] == 'Completed':
+                    reservation['Status'] = 'Ολοκληρωμένες'
+                elif reservation['Status'] == 'Cancelled':
+                    reservation['Status'] = 'Ακυρωμένες'
+                else:
+                    reservation['Status'] = 'Άγνωστο'
+
+    except Exception as e:
+        flash(str(e), "error")
+        print("Error executing SQL query:", e)
+    finally:
+        cursor.close()
+        db.connection.commit()
+
+    return render_template('Reservations_operator.html', role=role, user_id=user_id, username=username,
+                           reservations=reservations)
+
+
+@operator.route('/login/<role>/<user_id>/<username>/show_borrowings', methods=['GET', 'POST'])
+def borrowings_handling(role, user_id, username):
+    if 'username' not in session or session.get('role') != 'operator':
+        flash('Permission denied.')
+        return redirect(url_for('home.home_page'))
+
+    borrowings = []
+
+    try:
+        cursor = db.connection.cursor(DictCursor)
+        cursor.execute("SELECT SchoolID FROM Operator WHERE OperatorID = %s", (session['user_id'],))
+        school_id = cursor.fetchone()['SchoolID']
+
+        if request.method == 'POST':
+            time_period = request.form.get('time_period')
+
+            if time_period == 'all':
+                query = "SELECT b.BorrowID, au.Username, bk.Title, bk.ISBN, b.BookCopyID, b.Borrow_Date, b.Due_Date, b.Return_Date, b.Borrow_Status " \
+                        "FROM Borrow b " \
+                        "JOIN AppUser au ON b.SchoolUserID = au.UserID " \
+                        "JOIN Book bk ON b.BookID = bk.BookID " \
+                        "WHERE b.BookCopyID IN (SELECT BookCopyID FROM BookCopy WHERE SchoolID = %s)"
+                cursor.execute(query, (school_id,))
+            else:
+                query = "SELECT b.BorrowID, au.Username, bk.Title, bk.ISBN, b.BookCopyID, b.Borrow_Date, b.Due_Date, b.Return_Date, b.Borrow_Status " \
+                        "FROM Borrow b " \
+                        "JOIN AppUser au ON b.SchoolUserID = au.UserID " \
+                        "JOIN Book bk ON b.BookID = bk.BookID " \
+                        "WHERE b.BookCopyID IN (SELECT BookCopyID FROM BookCopy WHERE SchoolID = %s) " \
+                        "AND b.Borrow_Date >= DATE_SUB(CURRENT_DATE, INTERVAL %s DAY)"
+                cursor.execute(query, (school_id, time_period))
+        else:
+            query = "SELECT b.BorrowID, au.Username, bk.Title, bk.ISBN, b.BookCopyID, b.Borrow_Date, b.Due_Date, b.Return_Date, b.Borrow_Status " \
+                    "FROM Borrow b " \
+                    "JOIN AppUser au ON b.SchoolUserID = au.UserID " \
+                    "JOIN Book bk ON b.BookID = bk.BookID " \
+                    "WHERE b.BookCopyID IN (SELECT BookCopyID FROM BookCopy WHERE SchoolID = %s)"
+            cursor.execute(query, (school_id,))
+
+        borrowings = cursor.fetchall()
+
+    except Exception as e:
+        flash(str(e), "error")
+    finally:
+        cursor.close()
+        db.connection.commit()
+
+    return render_template('borrowings_handling.html', role=role, user_id=user_id, username=username, borrowings=borrowings)
 
 
 

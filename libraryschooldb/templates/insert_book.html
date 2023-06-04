@@ -65,6 +65,11 @@
             margin-left: 10px;
             border-radius: 4px;
         }
+
+        .new-genre-field {
+            display: none;
+        }
+
     </style>
     <script>
         function addAuthorField() {
@@ -98,6 +103,53 @@
 
         function removeKeywordField() {
             var container = document.getElementById("keywordContainer");
+            var inputs = container.getElementsByTagName("input");
+            if (inputs.length > 0) {
+                container.removeChild(inputs[inputs.length - 1]);
+                container.removeChild(container.lastElementChild);
+            }
+        }
+
+        function addGenreField() {
+            var container = document.getElementById("genreContainer");
+            var input = document.createElement("input");
+            input.type = "text";
+            input.name = "genres";
+            input.placeholder = "Είδος";
+            container.appendChild(input);
+            container.appendChild(document.createElement("br"));
+        }
+
+        function removeGenreField() {
+            var container = document.getElementById("genreContainer");
+            var inputs = container.getElementsByTagName("input");
+            if (inputs.length > 0) {
+                container.removeChild(inputs[inputs.length - 1]);
+                container.removeChild(container.lastElementChild);
+            }
+        }
+
+        function toggleNewGenreField() {
+            var newGenreField = document.getElementById("newGenreField");
+            if (newGenreField.style.display === "none") {
+                newGenreField.style.display = "block";
+            } else {
+                newGenreField.style.display = "none";
+            }
+        }
+
+        function addNewGenre() {
+            var container = document.getElementById("newGenresContainer");
+            var input = document.createElement("input");
+            input.type = "text";
+            input.name = "new_genres";
+            input.placeholder = "Νέο Είδος";
+            container.appendChild(input);
+            container.appendChild(document.createElement("br"));
+        }
+
+        function removeNewGenre() {
+            var container = document.getElementById("newGenresContainer");
             var inputs = container.getElementsByTagName("input");
             if (inputs.length > 0) {
                 container.removeChild(inputs[inputs.length - 1]);
@@ -146,27 +198,23 @@
             <button type="button" onclick="removeAuthorField()">-</button>
             <br>
 
-            <!-- Genre Leverage -->
-            <label>
-                <input type="checkbox" id="genreLeverage" name="genre_leverage">
-                Εισαγωγή Νέου Είδους
-            </label>
+            <!-- Genres Dropdown -->
+            <label>Genres:</label>
+            <select name="genres" id="genres" multiple>
+                {% for choice in form.genres.choices %}
+                    <option value="{{ choice[0] }}">{{ choice[1] }}</option>
+                {% endfor %}
+            </select>
+            <small>Hold Ctrl to select multiple genres</small>
             <br>
 
-            <!-- Genres Dropdown -->
-            <div id="genresContainer">
-                {{ form.genres.label }}: {{ form.genres }} <br>
-                {% for error in form.genres.errors %}
-                    <div class="error">{{ error }}</div>
-                {% endfor %}
-            </div>
 
             <!-- New Genre Input -->
             <div id="newGenreContainer">
-                {{ form.new_genre.label }}: {{ form.new_genre }} <br>
-                {% for error in form.new_genre.errors %}
-                    <div class="error">{{ error }}</div>
-                {% endfor %}
+                <label>New Genre:</label>
+                <button type="button" onclick="addNewGenre()">+</button>
+                <button type="button" onclick="removeNewGenre()">-</button>
+                <div id="newGenresContainer"></div>
             </div>
 
             {{ form.number_of_pages.label }}: {{ form.number_of_pages }} <br>
@@ -202,24 +250,5 @@
             {{ form.submit }}
         </fieldset>
     </form>
-
-    <script>
-        const genreLeverage = document.getElementById('genreLeverage');
-        const genresContainer = document.getElementById('genresContainer');
-        const newGenreContainer = document.getElementById('newGenreContainer');
-        const newGenreInput = document.getElementById('{{ form.new_genre.id }}');
-
-        genreLeverage.addEventListener('change', () => {
-            if (genreLeverage.checked) {
-                genresContainer.style.display = 'none';
-                newGenreContainer.style.display = 'block';
-                newGenreInput.setAttribute('required', '');
-            } else {
-                genresContainer.style.display = 'block';
-                newGenreContainer.style.display = 'none';
-                newGenreInput.removeAttribute('required');
-            }
-        });
-    </script>
 </body>
 </html>

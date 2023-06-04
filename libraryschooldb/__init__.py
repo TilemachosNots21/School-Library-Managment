@@ -18,11 +18,9 @@ from libraryschooldb.home import home
 from libraryschooldb.authentication import auth
 from libraryschooldb.admin import admin
 from libraryschooldb.oper import operator
-from libraryschooldb.teacher import teacher
-from libraryschooldb.student import student
+from libraryschooldb.SchoolUsers import school_user
 app.register_blueprint(home)
 app.register_blueprint(auth)
 app.register_blueprint(admin)
 app.register_blueprint(operator)
-app.register_blueprint(teacher)
-app.register_blueprint(student)
+app.register_blueprint(school_user)

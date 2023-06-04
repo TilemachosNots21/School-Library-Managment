@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Δανεισμοί</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #ff0000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        form {
+            display: inline;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .late-return {
+            background-color: #FFEFD5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Δανεισμοί</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div>
+            {% for category, message in messages %}
+                <p style="color: {{ 'green' if category == 'success' else 'red' }};">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('oper.borrowings_handling', role=role, user_id=user_id, username=username) }}">
+        <label for="time_period">Περίοδος Χρόνου:</label>
+        <select name="time_period" id="time_period">
+            <option value="all">Όλα</option>
+            <option value="7">Τελευταία εβδομάδα</option>
+            <option value="30">Τελευταίος μήνας</option>
+            <option value="90">Τελευταίοι 3 μήνες</option>
+        </select>
+        <button type="submit">Αναζήτηση</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Αριθμός Δανεισμού</th>
+                <th>Όνομα Χρήστη</th>
+                <th>Τίτλος Βιβλίου</th>
+                <th>ISBN Βιβλίου</th>
+                <th>Αριθμός Αντίτυπου</th>
+                <th>Ημερομηνία Δανεισμού</th>
+                <th>Ημερομηνία Προθεσμίας</th>
+                <th>Ημερομηνία Επιστροφής</th>
+                <th>Κατάσταση Δανεισμού</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for borrowing in borrowings %}
+            <tr>{% if borrowing.Borrow_Status == 'Overdue' %} class="late-return"{% endif %}>
+                <td>{{ borrowing.BorrowID }}</td>
+                <td>{{ borrowing.Username }}</td>
+                <td>{{ borrowing.Title }}</td>
+                <td>{{ borrowing.ISBN }}</td>
+                <td>{{ borrowing.BookCopyID }}</td>
+                <td>{{ borrowing.Borrow_Date }}</td>
+                <td>{{ borrowing.Due_Date }}</td>
+                <td>{{ borrowing.Return_Date }}</td>
+                <td>{{ borrowing.Borrow_Status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

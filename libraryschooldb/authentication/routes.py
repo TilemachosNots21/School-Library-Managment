@@ -61,9 +61,9 @@ def login():
                 elif role == 'operator':
                     return redirect(url_for('oper.operator_dashboard', role=session.get('role'), username=session.get('username'),user_id= session.get('user_id')))
                 elif role == 'Teacher':
-                    return redirect(url_for('teacher.teacher_dashboard', role=role, username=username, user_id= user_id ))
+                    return redirect(url_for('school_user.school_user_dashboard', role=role, username=username, user_id= user_id ))
                 elif role == 'Student':
-                    return redirect(url_for('student.student_dashboard', role=role, username=username, user_id= user_id))
+                    return redirect(url_for('school_user.school_user_dashboard', role=role, username=username, user_id= user_id))
             else:
                 flash('Incorrect username or password. Try again')
 
@@ -170,9 +170,7 @@ def register():
 
 @auth.route('/logout')
 def logout():
-    # Remove user's information from the session
     session.pop('username', None)
     session.pop('role', None)
     flash('You have been logged out.')
-    # Redirect to the home page (or any other page you want)
     return redirect(url_for('home.home_page'))

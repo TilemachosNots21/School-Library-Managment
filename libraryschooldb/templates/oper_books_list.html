@@ -24,7 +24,8 @@
         .book-action {
             margin-bottom: 5px;
         }
-        .book-action a, .book-action button {
+        .book-action a,
+        .book-action button {
             text-decoration: none;
             color: white;
             background-color: blue;
@@ -34,7 +35,8 @@
         .book-action button {
             border: none;
         }
-        .book-action a:hover, .book-action button:hover {
+        .book-action a:hover,
+        .book-action button:hover {
             background-color: green;
         }
     </style>
@@ -60,40 +62,32 @@
     </form>
 
     <ul>
-        {% for book in books %}
-        <li>
-            <div class="book-info">
-                <strong>Τίτλος:</strong> {{ book.title }} <br>
-                <strong>ISBN:</strong> {{ book.ISBN }} <br>
-                <strong>Εκδότης:</strong> {{ book.publisher }} <br>
-                <strong>Συγγραφείς:</strong>
-                {% for author in book.authors %}
-                {{ author.full_name }},
-                {% endfor %}
-                <br>
-                <strong>Κατηγορίες:</strong>
-                {% for category in book.categories %}
-                {{ category.category_name }},
-                {% endfor %}
-                <br>
-                <strong>Λέξεις-κλειδιά:</strong>
-                {% for keyword in book.keywords %}
-                {{ keyword.keyword_text }},
-                {% endfor %}
-                <br>
-                <strong>Διαθέσιμα Αντίτυπα:</strong> {{ book.available_copies }} <br>
-                {% if book.image %}
-                <img src="{{ book.image }}" alt="Book Image">
-                {% endif %}
-            </div>
-            <div class="book-action">
-                <a href="{{ url_for('edit_book', book_id=book.id) }}">Επεξεργασία</a>
-                <form action="{{ url_for('remove_book', book_id=book.id) }}" method="post" style="display: inline;">
-                    <button type="submit" onclick="return confirmDelete()">Αφαίρεση βιβλίου</button>
-                </form>
-            </div>
-        </li>
-        {% endfor %}
+        {% if books_list %}
+            {% for book in books_list %}
+                <li>
+                    <div class="book-info">
+                        <strong>Τίτλος:</strong> {{ book.Title }} <br>
+                        <strong>ISBN:</strong> {{ book.ISBN }} <br>
+                        <strong>Εκδότης:</strong> {{ book.Publisher }} <br>
+                        <strong>Συγγραφείς:</strong> {{ book.Authors }} <br>
+                        <strong>Κατηγορίες:</strong> {{ book.Categories }} <br>
+                        <strong>Λέξεις-κλειδιά:</strong> {{ book.Keywords }} <br>
+                        <strong>Διαθέσιμα Αντίτυπα:</strong> {{ book.TotalCopies }} <br>
+                        {% if book.Image %}
+                            <img src="{{ book.Image }}" alt="Book Image">
+                        {% endif %}
+                    </div>
+                    <div class="book-action">
+                        <a href="{{ url_for('oper.edit_book', book_id=book.BookID, role=role, user_id=user_id, username=username) }}">Επεξεργασία</a>
+                        <form action="{{ url_for('oper.delete_book', book_id=book.BookID, role=role, user_id=user_id, username=username) }}" method="post" style="display: inline;">
+                            <button type="submit" onclick="return confirmDelete()">Αφαίρεση βιβλίου</button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        {% else %}
+            <p>No books found.</p>
+        {% endif %}
     </ul>
 </body>
 </html>

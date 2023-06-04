@@ -37,13 +37,14 @@
             <h3>Εποπτεία</h3>
             <ul>
                 <a href="{{ url_for('oper.book_list', role=role, user_id=user_id, username=username) }}">Λίστα Βιβλίων Σχολικής Μονάδας</a> <br>
-                <a href="Users_List.html">Εμφάνιση Χρηστών</a> <br>
+                <a href="{{ url_for('oper.show_users', role=role, user_id=user_id, username=username) }}">Εμφάνιση Χρηστών</a> <br>
                 <!--Εποπτέια: συνολικά είτε κατόπιν αναζήτησης ανά χρήστη.-->
-                <a href="Reservations.html">Εμφάνιση Τρεχόντων Κρατήσεων και Δανεισμών</a> <br>
+                <a href="{{ url_for('oper.reservations_handling', role=role, user_id=user_id, username=username) }}">Εμφάνιση Τρεχόντων Κρατήσεων</a> <br>
+                <a href="{{ url_for('oper.borrowings_handling', role=role, user_id=user_id, username=username) }}">Εμφάνιση Τρεχόντων Δανεισμών</a> <br>
                 <!--Εμφανίζονται ξεχωριστά οι καθυστερήσεις.-->
                 <a href="Overdue.html">Εμφάνιση Καθηστερημένων Επιστροφών</a> <br>
                 <!--Εμφανίζονται οι αιτήσεις εγγραφών στο σύστημα.-->
-                <a href="Registration_requests.html">Αιτήματα Εγγραφής Χρηστών</a>
+                <a href="{{ url_for('oper.approve_school_user_registrations', role=role, user_id=user_id, username=username) }}">Αιτήματα Εγγραφής Χρηστών</a>
             </ul>
         </ul>
         </fieldset>
