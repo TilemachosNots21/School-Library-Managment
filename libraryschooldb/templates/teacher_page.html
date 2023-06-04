@@ -24,6 +24,8 @@
     </head>
     <body>
         <h1><a class="headline", href="Teacher_Dashboard.html">Δίκτυο Σχολικών Βιβλιοθηκών</a></h1>
+        <a href="{{ url_for('oper.book_list', role=role, user_id=user_id, username=username) }}">Λίστα Βιβλίων Σχολικής Μονάδας</a> <br>
+        <br>
         <a href="Edit_profile_Teacher.html">Επεξεργασία Στοιχείων Χρήστη</a> <br>
         <br>
         <a href="Personal_Borrow_History.html">Ιστορικό Δανεισμών</a> <br>
