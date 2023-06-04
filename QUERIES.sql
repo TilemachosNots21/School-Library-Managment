@@ -81,7 +81,7 @@ WHERE ac.BookCount >= ma.MaxBooks - 5;
 -- OPERATORS
 
 -- 3.2.1      
-SELECT B.Title, A.FullName
+SELECT B.Title, GROUP_CONCAT(A.FullName SEPARATOR ', ') AS Authors
 FROM Book B 
 JOIN BookAuthor BA ON B.BookID = BA.BookID
 JOIN Author A ON BA.AuthorID = A.AuthorID
@@ -89,7 +89,9 @@ JOIN BookCategory BC ON B.BookID = BC.BookID
 JOIN Category C ON BC.CategoryID = C.CategoryID
 WHERE B.Title LIKE ? AND A.FullName LIKE ? AND B.SchoolID = ? AND C.CategoryName LIKE ? AND EXISTS (
     SELECT 1 FROM BookCopy BC WHERE BC.BookID = B.BookID
-);
+)
+GROUP BY B.BookID;
+
 
 -- 3.2.2     
 SELECT su.FirstName, su.LastName, b.BookID, DATEDIFF(CURDATE(), bo.Due_Date) AS Delay_Days
@@ -102,7 +104,7 @@ AND bo.Borrow_Status = 'Overdue'
 AND DATEDIFF(CURDATE(), bo.Due_Date) > ? 
 ;
 
--- 3.3.3
+-- 3.2.3
 SELECT SU.FirstName, SU.LastName, C.CategoryName, AVG(R.Likert) as AverageRating
 FROM Review R
 JOIN SchoolUser SU ON R.SchoolUserID = SU.SchoolUserID
